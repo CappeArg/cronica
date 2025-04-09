@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuenta Regresiva Estilo Crónica</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilo adicional para emular la placa de Crónica TV */
+        
+        .cronica-plate {
+            font-family: 'Impact', Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+            /* Fuente similar a la de Crónica */
+            text-transform: uppercase;
+            /* Texto en mayúsculas */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            /* Sombra para el texto */
+            animation: blink 1s infinite alternate;
+            /* Animación de parpadeo sutil */
+            /* El borde y la sombra se pueden quitar si se prefiere un look 100% full screen sin bordes */
+            /* border: 3px solid #f00; */
+            /* box-shadow: 0 0 10px rgba(255, 0, 0, 0.7); */
+        }
+        /* Animación de parpadeo */
+        
+        @keyframes blink {
+            from {
+                opacity: 0.95;
+                /* Hacer el parpadeo más sutil en pantalla completa */
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        /* Asegurar que html y body ocupen toda la altura */
+        
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            /* Evitar barras de scroll si el contenido se desborda ligeramente */
+        }
+        /* Hacer que el body sea el contenedor principal relativo */
+        
+        body {
+            position: relative;
+            background-color: #dc2626;
+            /* Fondo rojo por defecto si la placa no carga */
+        }
+    </style>
+</head>
+
+<body class="bg-red-600"> <img src="" /* Posición absoluta arriba a la derecha, ajusta tamaño y z-index */ onerror="this.style.display='none'" /* Ocultar si la imagen no carga */>
+
+    <div id="countdown-container" class="cronica-plate bg-red-600 text-white font-bold w-full h-full flex flex-col justify-center items-center text-center p-4 md:p-8 z-10">
+        <div id="countdown-text" class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl">
+            Calculando...
+        </div>
+    </div>
+
+    <script>
+        // Función para calcular los días restantes
+        function calculateCountdown() {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth(); // 0 = Enero, 11 = Diciembre
+            const currentDay = now.getDate();
+
+            // Fechas de inicio de estaciones (Hemisferio Sur) - UTC
+            const todayUTC = Date.UTC(currentYear, currentMonth, currentDay);
+            const summerStartUTC = Date.UTC(currentYear, 11, 21); // 21 de Diciembre
+            const autumnStartUTC = Date.UTC(currentYear, 2, 21); // 21 de Marzo
+            const winterStartUTC = Date.UTC(currentYear, 5, 21); // 21 de Junio
+            const springStartUTC = Date.UTC(currentYear, 8, 21); // 21 de Septiembre
+
+            let targetSeasonName;
+            let targetDateUTC;
+
+            // Determinar la estación actual y la próxima estación objetivo usando UTC
+            if (todayUTC >= autumnStartUTC && todayUTC < winterStartUTC) {
+                targetSeasonName = "VERANO";
+                targetDateUTC = Date.UTC(currentYear, 11, 21);
+                if (todayUTC >= targetDateUTC) {
+                    targetDateUTC = Date.UTC(currentYear + 1, 11, 21);
+                }
+            } else if (todayUTC >= winterStartUTC && todayUTC < springStartUTC) {
+                targetSeasonName = "VERANO";
+                targetDateUTC = Date.UTC(currentYear, 11, 21);
+                if (todayUTC >= targetDateUTC) {
+                    targetDateUTC = Date.UTC(currentYear + 1, 11, 21);
+                }
+            } else if (todayUTC >= springStartUTC && todayUTC < summerStartUTC) {
+                targetSeasonName = "INVIERNO";
+                if (todayUTC >= Date.UTC(currentYear, 5, 21)) {
+                    targetDateUTC = Date.UTC(currentYear + 1, 5, 21);
+                } else {
+                    targetDateUTC = Date.UTC(currentYear, 5, 21);
+                }
+            } else { // Verano o entre 21 Dic y 21 Mar
+                targetSeasonName = "INVIERNO";
+                if (todayUTC >= Date.UTC(currentYear, 5, 21)) {
+                    targetDateUTC = Date.UTC(currentYear + 1, 5, 21);
+                } else {
+                    targetDateUTC = Date.UTC(currentYear, 5, 21);
+                }
+            }
+
+            // Calcular la diferencia en milisegundos usando UTC
+            const startOfTodayUTC = Date.UTC(currentYear, currentMonth, currentDay);
+            const diffTime = targetDateUTC - startOfTodayUTC;
+
+            // Convertir la diferencia a días
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            // Actualizar el contenido del div de texto
+            const countdownTextElement = document.getElementById('countdown-text');
+            if (diffDays > 1) {
+                countdownTextElement.textContent = `FALTAN ${diffDays} DÍAS PARA EL ${targetSeasonName}`;
+            } else if (diffDays === 1) {
+                countdownTextElement.textContent = `FALTA 1 DÍA PARA EL ${targetSeasonName}`;
+            } else if (diffDays === 0) {
+                countdownTextElement.textContent = `¡HOY COMIENZA EL ${targetSeasonName}!`;
+            } else {
+                countdownTextElement.textContent = `¡BIENVENIDO ${targetSeasonName}!`;
+                console.warn("Calculated diffDays is negative or unexpected:", diffDays);
+            }
+        }
+
+        // Ejecutar la función al cargar la página
+        window.onload = calculateCountdown;
+
+        // Opcional: Actualizar cada cierto tiempo (ej. cada hora)
+        // setInterval(calculateCountdown, 1000 * 60 * 60);
+    </script>
+
+</body>
+
+</html>
